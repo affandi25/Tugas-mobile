@@ -1,0 +1,452 @@
+import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
+import '../models/models.dart';
+import '../widgets/topping_selector.dart';
+import '../widgets/quantity_counter.dart';
+import 'payment_success_screen.dart';
+
+// Layar Detail Produk & Konfirmasi Pesanan Sesuai Figma (iPhone 16 Plus - 11 s/d 18)
+// Fitur:
+// 1. Gambar & Nama Varian Rasa
+// 2. Alamat Pengiriman ("Delivering to : Alamat rumahmu")
+// 3. Dropdown Topping ("Tambah Toping" - Komponen gabung #123:443)
+// 4. Pengatur Jumlah Pesanan (Component 2 #125:598)
+// 5. Input Kode Voucher ("KODE VOUCHER" & tombol "Kirim")
+// 6. Ringkasan Total Harga Dinamis
+// 7. Tombol CTA "PESAN" (#431BC6)
+class ProductDetailScreen extends StatefulWidget {
+  final ProductModel product;
+
+  const ProductDetailScreen({super.key, required this.product});
+
+  @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  ToppingModel? _selectedTopping;
+  int _quantity = 1;
+  final TextEditingController _voucherController = TextEditingController();
+  int _discount = 0;
+  String _voucherMessage = '';
+
+  int get _itemPrice => widget.product.price;
+  int get _toppingPrice => _selectedTopping?.price ?? 0;
+  int get _subtotal => (_itemPrice + _toppingPrice) * _quantity;
+  int get _grandTotal => (_subtotal - _discount) > 0 ? (_subtotal - _discount) : 0;
+
+  void _applyVoucher() {
+    final code = _voucherController.text.trim().toUpperCase();
+    setState(() {
+      if (code == 'SWEET10K') {
+        _discount = 10000;
+        _voucherMessage = 'Diskon kupon Rp 10.000 diterapkan!';
+      } else if (code == 'JUMATBERKAH') {
+        _discount = 5000;
+        _voucherMessage = 'Diskon Jumat Berkah Rp 5.000 diterapkan!';
+      } else if (code == 'GRATISTEH') {
+        _discount = 3000;
+        _voucherMessage = 'Diskon Es Teh Rp 3.000 diterapkan!';
+      } else if (code.isEmpty) {
+        _discount = 0;
+        _voucherMessage = '';
+      } else {
+        _discount = 0;
+        _voucherMessage = 'Kode voucher tidak valid.';
+      }
+    });
+
+    if (_voucherMessage.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_voucherMessage),
+          backgroundColor: _discount > 0 ? const Color(0xFF558B2F) : Colors.redAccent,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _processOrder() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PaymentSuccessScreen(
+          product: widget.product,
+          topping: _selectedTopping,
+          quantity: _quantity,
+          grandTotal: _grandTotal,
+        ),
+      ),
+    );
+  }
+
+  Color _getFlavorColor(String name) {
+    if (name.contains('Coklat')) return const Color(0xFF6D4C41);
+    if (name.contains('Matcha')) return const Color(0xFF558B2F);
+    if (name.contains('Taro')) return const Color(0xFF7E57C2);
+    if (name.contains('Strawberi')) return const Color(0xFFE91E63);
+    return AppColors.primaryGold;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.scaffoldBg,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'bayar Pesanan', // Persis teks Figma #72:739
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Kartu Banner Produk
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x10000000),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 130,
+                      width: 130,
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _getFlavorColor(widget.product.name).withValues(alpha: 0.2),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: widget.product.imagePath.isNotEmpty
+                            ? Image.asset(
+                                widget.product.imagePath,
+                                width: 105,
+                                height: 105,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) => Icon(
+                                  Icons.cake_rounded,
+                                  size: 76,
+                                  color: _getFlavorColor(widget.product.name),
+                                ),
+                              )
+                            : Icon(
+                                Icons.cake_rounded,
+                                size: 76,
+                                color: _getFlavorColor(widget.product.name),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      widget.product.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Rp ${widget.product.price}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryGold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.product.description,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // 2. Alamat Pengiriman Sesuai Figma ("Delivering to : Alamat rumahmu")
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.grayInput.withValues(alpha: 0.6)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined, color: AppColors.primaryGold, size: 24),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Delivering to :', // Persis Figma #125:561
+                            style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                          ),
+                          Text(
+                            'Alamat rumahmu', // Persis Figma #125:566
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Ubah alamat pengiriman')),
+                        );
+                      },
+                      child: const Text('Ubah', style: TextStyle(fontSize: 12, color: AppColors.primaryGold)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // 3. Topping Selector (Komponen gabung #123:443)
+              ToppingSelector(
+                selectedTopping: _selectedTopping,
+                onToppingSelected: (val) {
+                  setState(() {
+                    _selectedTopping = val;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // 4. Quantity Counter Row (Component 2 #125:598)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Jumlah Pesanan',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  QuantityCounter(
+                    quantity: _quantity,
+                    onQuantityChanged: (newQty) {
+                      setState(() {
+                        _quantity = newQty;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // 5. Kode Voucher Input Sesuai Figma (#72:786, #72:784, #72:785)
+              const Text(
+                'KODE VOUCHER', // Persis Figma #72:786
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 46,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.grayInput),
+                      ),
+                      child: TextField(
+                        controller: _voucherController,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: const InputDecoration(
+                          hintText: 'Masukan Kode Voucher Anda', // Persis Figma #72:784
+                          hintStyle: TextStyle(fontSize: 12, color: Colors.black38),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    height: 46,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryGold,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                      ),
+                      onPressed: _applyVoucher,
+                      child: const Text(
+                        'Kirim', // Persis Figma #72:785
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Metode Pembayaran Sesuai Figma (#72:795)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.grayInput.withValues(alpha: 0.6)),
+                ),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'asset/dana_wallet.png',
+                      width: 36,
+                      height: 36,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF118EEA), size: 32),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'DANA e-wallet', // Persis Figma #72:800
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                          ),
+                          Text(
+                            '08123456789', // Persis Figma #72:801
+                            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.check_circle_rounded, color: Color(0xFF2ED542), size: 20),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // 6. Rincian Biaya
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('${widget.product.name} (x$_quantity)', style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                        Text('Rp ${_itemPrice * _quantity}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                    if (_selectedTopping != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Topping: ${_selectedTopping!.name} (x$_quantity)', style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                          Text('Rp ${_toppingPrice * _quantity}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ],
+                    if (_discount > 0) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Diskon Voucher', style: TextStyle(fontSize: 13, color: Color(0xFF558B2F))),
+                          Text('-Rp $_discount', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF558B2F))),
+                        ],
+                      ),
+                    ],
+                    const Divider(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total', // Persis Figma #72:740
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                        ),
+                        Text(
+                          'Rp $_grandTotal', // Persis Figma #72:742
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryGold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // 7. Tombol CTA PESAN Sesuai Figma (#340:998 / #431BC6)
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF431BC6), // Ungu khas Figma
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 3,
+                  ),
+                  onPressed: _processOrder,
+                  child: const Text(
+                    'PESAN',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

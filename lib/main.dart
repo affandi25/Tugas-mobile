@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'profil.dart';
+import 'core/app_colors.dart';
+import 'screens/onboarding_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -11,94 +13,23 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('yusuf'),
-        ),
-        body: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              children: [
-                const Text('welcome to'),
-                const SizedBox(height: 20),
-                const Text(
-                  'this is a simple flutter app',
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    fontStyle: FontStyle.italic,
-                    decoration: TextDecoration.underline,
-                    backgroundColor: Colors.yellow,
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black,
-                        blurRadius: 4,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.get_app_rounded,
-                      color: Colors.yellow,
-                      size: 28,
-                    ),
-                    Text('data'),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'data',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: Image.asset(
-                    'asset/yusuf.jpeg',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Builder(
-                  builder: (context) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Profil()),
-                        );
-                      },
-                      child: const Text('Go to Profil'),
-                    );
-                  }
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
+      debugShowCheckedModeBanner: false,
+      title: 'Sweet Dessert App',
+      // Mengaktifkan drag gesture untuk mouse & touch agar bisa digeser di Chrome / Desktop
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.stylus,
+        },
       ),
+      theme: ThemeData(
+        scaffoldBackgroundColor: AppColors.scaffoldBg,
+        primaryColor: AppColors.primaryGold,
+        useMaterial3: true,
+      ),
+      home: const OnboardingScreen(),
     );
   }
 }
