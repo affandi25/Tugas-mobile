@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../data/dummy_data.dart';
-import '../../models/models.dart';
+import '../../models/order_model.dart';
 
 class MyOrderScreen extends StatelessWidget {
   final VoidCallback? onBack;

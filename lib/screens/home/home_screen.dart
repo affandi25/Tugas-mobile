@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/app_text_styles.dart';
 import '../../data/dummy_data.dart';
-import '../../models/models.dart';
+import '../../models/product_model.dart';
 import '../menu/menu_catalog_screen.dart';
 import '../auth/login_screen.dart';
 import '../../widgets/promo_banner_slider.dart';

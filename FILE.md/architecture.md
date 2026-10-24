@@ -43,8 +43,7 @@ flutter_application_2/
 │   ├── models/                     <-- Model data (Struktur Object)
 │   │   ├── product_model.dart      <-- Blueprint menu (nama, rasa, harga, gambar)
 │   │   ├── topping_model.dart      <-- Blueprint topping (nama, harga, terpilih)
-│   │   ├── order_model.dart        <-- Blueprint pesanan aktif
-│   │   └── models.dart             <-- Barrel export untuk interoperabilitas
+│   │   └── order_model.dart        <-- Blueprint pesanan aktif
 │   │
 │   ├── data/                       <-- Data tiruan lokal (Dummy Data)
 │   │   └── dummy_data.dart         <-- List data master produk, topping, & initial order

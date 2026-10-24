@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
-import '../models/models.dart';
+import '../models/topping_model.dart';
 import '../data/dummy_data.dart';
 
 // Widget Pemilih Topping Sesuai Komponen Figma "gabung" (#123:443)

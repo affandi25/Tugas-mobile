@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../data/dummy_data.dart';
-import '../../models/models.dart';
+import '../../models/order_model.dart';
+import '../../models/product_model.dart';
+import '../../models/topping_model.dart';
 import '../main_nav_screen.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
