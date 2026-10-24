@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/app_text_styles.dart';
+import '../../services/auth_service.dart';
 import '../main_nav_screen.dart';
 import 'register_screen.dart';
 
@@ -23,30 +24,36 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    final username = _usernameController.text.trim();
+  void _handleLogin() async {
+    final email = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username dan Password tidak boleh kosong!')),
+        const SnackBar(content: Text('Email dan Password tidak boleh kosong!')),
       );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.successGreen,
-        content: Text('Login berhasil! Selamat datang, $username'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    final success = await AuthService.instance.login(email, password);
+    if (!mounted) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-      (route) => false,
-    );
+    if (success) {
+      final user = AuthService.instance.currentUser;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.successGreen,
+          content: Text('Login berhasil! Selamat datang, ${user?.name ?? email}'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        (route) => false,
+      );
+    }
   }
 
   @override

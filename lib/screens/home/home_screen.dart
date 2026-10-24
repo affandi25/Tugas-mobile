@@ -3,6 +3,7 @@ import '../../core/app_colors.dart';
 import '../../core/app_text_styles.dart';
 import '../../data/dummy_data.dart';
 import '../../models/product_model.dart';
+import '../../services/auth_service.dart';
 import '../menu/menu_catalog_screen.dart';
 import '../auth/login_screen.dart';
 import '../../widgets/promo_banner_slider.dart';
@@ -41,29 +42,45 @@ class HomeScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 26,
-                        backgroundColor: AppColors.yellowAccent,
-                        backgroundImage: AssetImage('asset/yusuf.jpeg'),
-                      ),
-                      const SizedBox(width: 14),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Hallo,', style: AppTextStyles.caption.copyWith(fontSize: 13)),
-                          const Text(
-                            'Yusuf Affandi!',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textDark,
+                  AnimatedBuilder(
+                    animation: AuthService.instance,
+                    builder: (context, _) {
+                      final user = AuthService.instance.currentUser;
+                      final displayName = user?.name ?? 'Yusuf Affandi';
+                      final avatarPath = user?.avatarPath ?? 'asset/yusuf.jpeg';
+
+                      return GestureDetector(
+                        onTap: () {
+                          if (onSelectTab != null) {
+                            onSelectTab!(3); // Pindah ke tab Profil
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 26,
+                              backgroundColor: AppColors.yellowAccent,
+                              backgroundImage: AssetImage(avatarPath),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(width: 14),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Hallo,', style: AppTextStyles.caption.copyWith(fontSize: 13)),
+                                Text(
+                                  '$displayName!',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   Row(
                     children: [
@@ -563,6 +580,7 @@ class HomeScreen extends StatelessWidget {
                   leading: const Icon(Icons.logout, color: Colors.red),
                   title: const Text('Keluar (Logout)', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                   onTap: () {
+                    AuthService.instance.logout();
                     Navigator.pop(ctx);
                     Navigator.pushAndRemoveUntil(
                       context,
