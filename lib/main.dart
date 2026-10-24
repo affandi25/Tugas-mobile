@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'core/app_colors.dart';
-import 'screens/onboarding_screen.dart';
+import 'core/app_theme.dart';
+import 'screens/onboarding/onboarding_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -24,12 +24,9 @@ class MainApp extends StatelessWidget {
           PointerDeviceKind.stylus,
         },
       ),
-      theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.scaffoldBg,
-        primaryColor: AppColors.primaryGold,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       home: const OnboardingScreen(),
     );
   }
 }
+

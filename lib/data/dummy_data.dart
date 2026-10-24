@@ -62,18 +62,50 @@ class DummyData {
     ToppingModel(id: 't5', name: 'Keju', price: 3000),
   ];
 
-  // Mock Pesanan Aktif untuk My Order Screen (Sesuai Figma)
+  // Mock Pesanan Aktif untuk My Order Screen (Sesuai Figma #125:670)
   static List<OrderItemModel> sampleOrders = [
     const OrderItemModel(
-      product: ProductModel(id: 'p3', name: 'Rasa Taro', price: 23000),
+      product: ProductModel(
+        id: 'p1',
+        name: 'Rasa Coklat',
+        price: 20000,
+        imagePath: 'asset/rasa_coklat.png',
+      ),
       toppings: [ToppingModel(id: 't1', name: 'Oreo', price: 3000)],
-      quantity: 1,
+      quantity: 2,
       status: 'delivery',
     ),
     const OrderItemModel(
-      product: ProductModel(id: 'p1', name: 'Rasa Coklat', price: 20000),
-      toppings: [ToppingModel(id: 't2', name: 'Chocochip', price: 3000)],
-      quantity: 1,
+      product: ProductModel(
+        id: 'p5',
+        name: 'Rasa Tiramizu',
+        price: 23000,
+        imagePath: 'asset/rasa_tiramizu.png',
+      ),
+      toppings: [ToppingModel(id: 't1', name: 'Oreo', price: 3000)],
+      quantity: 2,
+      status: 'delivery',
+    ),
+    const OrderItemModel(
+      product: ProductModel(
+        id: 'p4',
+        name: 'Rasa Matcha',
+        price: 22000,
+        imagePath: 'asset/rasa_matcha.png',
+      ),
+      toppings: [ToppingModel(id: 't1', name: 'Oreo', price: 3000)],
+      quantity: 2,
+      status: 'delivery',
+    ),
+    const OrderItemModel(
+      product: ProductModel(
+        id: 'p3',
+        name: 'Rasa Taro',
+        price: 23000,
+        imagePath: 'asset/rasa_taro.png',
+      ),
+      toppings: [ToppingModel(id: 't1', name: 'Oreo', price: 3000)],
+      quantity: 2,
       status: 'delivery',
     ),
   ];

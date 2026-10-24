@@ -70,13 +70,13 @@
 ---
 
 ## Tahap 6: Lacak Pesanan, Chat Bantuan & Profil (Orders, Chat & Profile)
-* [ ] **Layar Pesanan Saya (`MyOrderScreen`)**:
-  * Menampilkan daftar pesanan (*Rasa Taro, Rasa Coklat, Rasa Tiramizu, Rasa Matcha*).
+* [x] **Layar Pesanan Saya (`MyOrderScreen`)**:
+  * Menampilkan daftar pesanan (*Rasa Coklat, Rasa Tiramizu, Rasa Matcha, Rasa Taro*).
   * Badge status pengiriman berwarna hijau cerah: `Order Status : delivery`.
-  * Rincian total pembayaran (misal: `Total : Rp 26.000`).
-* [ ] **Layar Chat / Bantuan (`ChatScreen`)**:
-  * Tampilan pesan pelanggan dengan input bar: *"Kirim Pesan...."*.
-* [ ] **Layar Profil (`ProfileScreen` & Modal Ubah Sandi)**:
+  * Rincian total pembayaran dinamis dan terhubung dengan hasil checkout pesanan.
+* [x] **Layar Chat / Bantuan (`ChatScreen` / Sheet)**:
+  * Tampilan pesan percakapan pelanggan dengan input bar: *"Kirim Pesan...."*.
+* [x] **Layar Profil (`ProfileScreen` & Modal Ubah Sandi)**:
   * Foto profil besar dengan tombol *"Ubah Foto"*.
   * Data identitas pengguna: *Nama*, *Bio*, *Jenis Kelamin*, *Tanggal Lahir*, *No. Handphone*, *Email*.
   * Modal/Form *"Ubah Kata Sandi"*: *Sandi lama*, *Sandi baru*, *Ulangi sandi baru*.
@@ -85,5 +85,84 @@
 ---
 
 ## Tahap 7: Uji Coba, Polish, & Persiapan Tugas
-* [ ] Jalankan pengujian pada emulator / browser untuk memastikan tidak ada *overflow* atau error.
-* [ ] Tambahkan komentar penjelas di baris-baris kode penting agar kamu mudah menjelaskannya saat dinilai oleh dosen.
+* [x] Jalankan pengujian pada emulator / browser untuk memastikan tidak ada *overflow* atau error.
+* [x] Struktur kode modular dan clean (0 error, 0 warning pada `flutter analyze`).
+
+---
+
+# FASE 2: Transformasi Sistem Aplikasi Nyata (Living App System & Backend)
+
+## Tahap 8: Sistem Beranda Hidup & Pusat Notifikasi Interaktif (Living Home Dashboard)
+* [ ] **8.1. Pusat Notifikasi & Badge Lonceng Reaktif**:
+  * Buat model `NotificationModel` (`id`, `title`, `message`, `time`, `isRead`, `type`).
+  * Badge lonceng berhitung dinamis berdasarkan `unreadCount` (hilang jika semua terbaca).
+  * Modal/Sheet Notifikasi interaktif: menampilkan status pesanan & kupon, tombol *"Tandai Semua Dibaca"*, dan *"Lihat Pesanan"* langsung menuju tab *My Order*.
+  * Pemicu otomatis: Pembayaran checkout sukses memicu notifikasi baru *"Pesanan Sedang Diproses!"*.
+* [ ] **8.2. Header Pengguna & Sapaan Dinamis**:
+  * Hubungkan nama pengguna di header dengan sesi user aktif (*"Hallo, [Nama]!"*).
+  * Avatar profil dapat diklik untuk berpindah langsung ke tab Profil.
+* [ ] **8.3. Search Bar Interaktif**:
+  * Hubungkan `TextField` pencarian dengan `onSubmitted` $\rightarrow$ membuka Katalog Menu dengan filter kata kunci otomatis aktif.
+* [ ] **8.4. Banner Promo & Klaim Kupon Interaktif**:
+  * Tombol *"Ambil"* pada slider banner menyimpan voucher ke dompet kupon pengguna (`claimedCoupons`).
+  * Kupon tersimpan otomatis terpasang saat checkout di layar detail produk.
+* [ ] **8.5. Daftar Best Seller (Master Data Lokal)**:
+  * Tampilkan 3 produk terfavorit (Tiramizu, Coklat, Matcha) langsung dari `DummyData.products`.
+* [ ] **8.6. Menu Pengaturan & Session-Safe Logout**:
+  * Tombol keluar pada sheet gear membersihkan token sesi lokal.
+
+
+## Tahap 9: Sistem Keranjang Belanja Terpadu (Cart System & Multi-Item Checkout)
+* [ ] Buat model `CartItemModel` dan `CartService` untuk mengelola keranjang belanja terpusat.
+* [ ] **Integrasi Header Katalog (`menu_catalog_screen.dart`)**:
+  * Aktifkan ikon keranjang belanja di pojok kanan atas dengan badge angka jumlah item yang dinamis.
+  * Dukung `initialSearchQuery` dari Search Bar Beranda ke Katalog.
+* [ ] **Fitur Detail Produk & Checkout Dinamis (`product_detail_screen.dart`)**:
+  * Dialog ubah alamat pengiriman fleksibel.
+  * Pilihan metode pembayaran: E-Wallet (DANA/GoPay), Tunai/COD, dan Transfer Bank.
+  * Tombol cepat pasang kupon tersimpan dari promo Beranda.
+  * Opsi tombol ganda: *"Tambah ke Keranjang"* vs *"PESAN SEKARANG"*.
+* [ ] **Konfirmasi Pembayaran & Terbit Invoice (`payment_success_screen.dart`)**:
+  * Penerbitan No. Invoice resmi (`#ORD-YYYYMMDD-XXX`).
+  * Pemicu otomatis notifikasi baru ke Lonceng Beranda.
+* [ ] Buat Lembar Keranjang Belanja (*Shopping Cart Sheet*):
+  * Pengguna bisa mengatur kuantitas (`-` / `+`) atau menghapus donat.
+  * Ringkasan total biaya multi-item (misal: 2 Coklat + 1 Matcha).
+  * Tombol *"Checkout Semua"* yang langsung memproses seluruh belanjaan dalam satu struk transaksi.
+
+
+
+## Tahap 10: Siklus Hidup Status Pesanan Interaktif (Order Lifecycle Tracking)
+* [ ] Implementasi 3 status pesanan bertahap:
+  1. `Diproses` (Kuning/Oranye - Dapur sedang menyiapkan donat).
+  2. `Sedang Diantar (delivery)` (Hijau Terang - Kurir dalam perjalanan).
+  3. `Selesai` (Hijau Sukses - Donat telah sampai).
+* [ ] Tambahkan tombol aksi interaktif *"Pesanan Diterima"* pada kartu pesanan `delivery` $\rightarrow$ update status jadi `Selesai` & kirim notifikasi selesai ke Lonceng.
+* [ ] Lembar Rincian Pesanan / Struk Digital (*Order Detail Sheet*) saat kartu pesanan diklik:
+  * Menampilkan No. Invoice resmi (`#ORD-XXXX`).
+  * Waktu pemesanan, alamat pengiriman, dan metode pembayaran.
+  * Rincian subtotal donat, topping, diskon voucher, total bayar, dan tombol bantuan CS.
+* [ ] Aktifkan interaktivitas ikon header My Order:
+  * Ikon keranjang belanja membuka *Shopping Cart Sheet*.
+  * Ikon gear membuka modal pengaturan akun & logout.
+* [ ] Penyimpanan riwayat pesanan permanen ke database MySQL (`orders` & `order_items`) dan memori lokal.
+
+
+## Tahap 11: Setup Backend Laravel REST API & Database MySQL (Persistence Layer)
+* [ ] Setup proyek Laravel API terpisah (`c:\xampp\htdocs\donut-api` atau `donut_api`).
+* [ ] Buat database MySQL di XAMPP (`db_donut_app`) beserta migrasi 6 tabel relasional (`users`, `cart_items`, `orders`, `order_items`, `notifications`, `claimed_coupons`).
+* [ ] Buat API Controller: Auth (`/api/login`, `/api/register`, `/api/logout`), Notifications, Cart, Orders, dan Profile.
+* [ ] Integrasi Flutter `ApiService` dengan konfigurasi IP emulator (`10.0.2.2`).
+
+* [ ] **Sistem Manajemen Sesi & Profil Pengguna**:
+  * Simpan Bearer Token & User Profile menggunakan `SharedPreferences`.
+  * Hubungkan data profil aktif (nama, email, bio, no. hp, tgl lahir) ke Layar Profil.
+  * Fitur **Edit Biodata & Tombol Simpan**: Sinkronisasi perubahan ke MySQL (`PUT /api/profile`) dan otomatis perbarui sapaan Beranda (*"Hallo, [Nama Baru]!"*).
+  * Fitur **Ubah Foto Profil**: Pemilihan foto dari perangkat dan update avatar secara instan.
+  * Fitur **Ubah Kata Sandi Aman**: Verifikasi kecocokan hash sandi lama di database.
+  * Fitur **Auto-Login** (langsung masuk ke Beranda jika sesi aktif) dan **Logout** (bersihkan sesi).
+* [ ] *Zero-Crash Fallback*: Jika server Laravel mati, aplikasi otomatis memakai data lokal agar aman saat presentasi.
+
+
+
+

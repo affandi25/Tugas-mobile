@@ -122,3 +122,28 @@ const BoxShadow buttonShadow = BoxShadow(
 * Posisi: Fixed di bagian bawah Scaffold
 * Ikon: Home (Beranda), Menu (Katalog), Order (Pesanan), Profil (Akun)
 * Indikator aktif: Aksen warna emas (`Color(0xFFD19025)`)
+
+### 5.5. Notification Badge & Sheet (Pusat Notifikasi)
+* **Badge Lonceng Dinamis**:
+  * Diameter: $18 \text{ dp}$
+  * Warna: Merah Aksen (`#E53935`) atau Emas (`#F0C24D`) dengan teks putih/gelap bold 10px.
+  * Perilaku: Otomatis hilang jika `unreadCount == 0`.
+* **Kartu Notifikasi**:
+  * Background: Putih (`#FFFFFF`) dengan sudut melengkung `BorderRadius.circular(14.0)`.
+  * Status Unread: Terdapat titik biru/emas di sisi kanan sebagai penanda belum dibaca.
+  * Ikon Status: Hijau untuk pesanan siap/diantar, emas untuk promo baru.
+
+### 5.6. Shopping Cart Badge & Drawer (Keranjang Belanja)
+* **Cart Badge**: Lingkaran angka merah di sudut atas ikon keranjang belanja belanja di Beranda, Katalog, dan My Order.
+* **Sheet Keranjang Belanja**:
+  * Bottom sheet melengkung dengan *drag handle* di bagian atas.
+  * Kartu item donat dengan foto thumbnail ($60 \times 60 \text{ dp}$), nama rasa, topping, dan tombol kuantitas mini (`-` / `+`).
+  * Tombol CTA: *"Checkout Semua"* dengan total harga yang terhitung otomatis.
+
+### 5.7. Status Pesanan (Order Status Chips)
+* **Status Diproses (Cooking/Preparing)**:
+  * Warna: Oranye Emas (`#E65100`), background krem hangat (`#FFF3E0`).
+* **Status Sedang Diantar (Delivery)**:
+  * Warna: Hijau Sukses (`#0FA92C`), background hijau lembut (`#E8F8EA`).
+* **Status Selesai (Completed)**:
+  * Warna: Abu-abu Netral (`#616161`), background abu-abu lembut (`#F5F5F5`).

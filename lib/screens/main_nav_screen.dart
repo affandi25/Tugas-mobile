@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
-import 'home_screen.dart';
-import 'menu_catalog_screen.dart';
+import 'home/home_screen.dart';
+import 'menu/menu_catalog_screen.dart';
+import 'order/my_order_screen.dart';
+import 'profile/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -30,8 +32,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           });
         },
       ),
-      const _PlaceholderScreen(title: 'Pesanan Saya (My Order)', icon: Icons.receipt_long_rounded),
-      const _PlaceholderScreen(title: 'Profil Pengguna', icon: Icons.person_rounded),
+      MyOrderScreen(
+        onBack: () {
+          setState(() {
+            _currentIndex = 0;
+          });
+        },
+      ),
+      ProfileScreen(
+        onBack: () {
+          setState(() {
+            _currentIndex = 0;
+          });
+        },
+      ),
     ];
 
     return Scaffold(
@@ -77,44 +91,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),
               label: 'Profil',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const _PlaceholderScreen({required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
-      appBar: AppBar(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 72, color: AppColors.primaryGold.withValues(alpha: 0.5)),
-            const SizedBox(height: 16),
-            Text(
-              'Layar $title',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Akan diimplementasikan pada tahap selanjutnya.',
-              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
             ),
           ],
         ),

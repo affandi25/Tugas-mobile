@@ -14,10 +14,11 @@ Aplikasi ini berfokus pada pengalaman pemesanan makanan/dessert manis (seperti d
 ---
 
 ## 2. Ruang Lingkup Sistem (Scope)
-Agar sesuai dengan tingkat materi kuliah saat ini, aplikasi dibuat dengan arsitektur **Clean & Simple**:
-1. **Frontend**: 100% Flutter framework dengan styling pixel-perfect sesuai Figma.
-2. **Data Layer**: Menggunakan model Dart dan data lokal (*dummy/mock data*) sehingga aplikasi langsung interaktif tanpa harus bergantung pada database backend/API eksternal yang rumit.
-3. **State Management**: Menggunakan `StatefulWidget` bawaan Flutter (`setState`), sangat ideal agar kode mudah dipahami dan dijelaskan saat asistensi/presentasi tugas ke dosen.
+Aplikasi dikembangkan menggunakan arsitektur **Client-Server**:
+1. **Frontend Mobile (Client)**: 100% Flutter framework dengan antarmuka presisi (*pixel-perfect*) sesuai Figma.
+2. **Backend API (Server)**: RESTful API berbasis **Laravel** (PHP) yang menangani logika bisnis, validasi, dan autentikasi.
+3. **Database Layer**: Database relasional **MySQL** untuk menyimpan data pengguna, menu donat, topping, keranjang, dan riwayat pesanan secara permanen (*real persistence*).
+4. **State & Networking**: Integrasi HTTP Client di Flutter (`http` / `dio`) dengan penanganan status respons JSON, session token, dan mekanisme *fallback/offline mode*.
 
 ---
 
@@ -31,79 +32,121 @@ Agar sesuai dengan tingkat materi kuliah saat ini, aplikasi dibuat dengan arsite
   * Tombol CTA utama: *"GET STARTED"*.
 * **Aksi**: Menekan tombol akan mengarahkan pengguna ke halaman Login.
 
-### 3.2. Autentikasi (Login & Register)
-* **Tujuan**: Gerbang masuk pengguna ke dalam aplikasi.
-* **Fitur**:
-  * Input Form: Email/Username dan Password.
-  * Tombol aksi: *"Submit"*.
-  * Opsi Social Login: Tombol login alternatif (Google, Apple, dll.).
-  * Navigasi silang: Tautan *"Don't have account? Register"* dan sebaliknya.
-  * Validasi sederhana (field tidak boleh kosong).
+### 3.2. Autentikasi & Manajemen Sesi Pengguna
+* **Tujuan**: Gerbang masuk pengguna dan inisialisasi sesi dinamis.
+* **Fitur Dinamis**:
+  * Input Form: Username/Email dan Password dengan validasi format.
+  * **Sesi Login Dinamis**: Username yang diinput saat login/register digunakan secara otomatis sebagai identitas aktif di Beranda (*"Hallo, [Nama]!"*) dan Profil.
+  * **Penyimpanan Sesi (Session Persistence)**: Pengguna yang sudah login tidak perlu mengulang proses onboarding/login saat aplikasi dibuka kembali.
+  * Opsi Social Login & Navigasi silang Login $\leftrightarrow$ Register.
 
-### 3.3. Beranda (Home Dashboard)
-* **Tujuan**: Menampilkan menu terpopuler, promosi, dan navigasi cepat.
-* **Fitur**:
-  * Header User: Greeting personal (*"Hallo, Yusuf Affandi!"*), avatar bulat, dan ikon notifikasi lonceng dengan badge angka.
-  * Kolom Pencarian (*Search Bar*): Input pencarian menu.
-  * Banner Promo: Menampilkan penawaran diskon dengan background gradien emas/karamel.
-  * Bagian *"BEST SELLER"*: Daftar horizontal produk terlaris dengan foto, nama, dan harga.
-  * Bottom Navigation Bar: Menu navigasi utama (Home, Katalog, Order, Profil).
+### 3.3. Beranda (Home Dashboard Interaktif)
+* **Tujuan**: Pusat aktivitas, notifikasi, promo, dan menu terpopuler.
+* **Fitur Dinamis Beranda (Living System)**:
+  1. **Header Pengguna Terpersonalisasi**:
+     * Sapaan dinamis sesuai akun yang sedang login (*"Hallo, [Nama Pengguna]!"*), bersumber dari sesi login aktif.
+     * Avatar profil dinamis (menampilkan foto pengguna) dan dapat diklik untuk navigasi instan ke tab Profil.
+  2. **Pusat Notifikasi & Lonceng Hidup (Notification Center)**:
+     * Badge angka reaktif yang menghitung jumlah notifikasi belum dibaca (`unread count`). Jika seluruh notifikasi sudah dibaca, badge angka otomatis menghilang.
+     * Lembar Notifikasi Interaktif (*Notification Sheet*): Memuat daftar notifikasi riil (pembaruan status pesanan *"Pesanan Siap!"*, *"Driver sedang menuju lokasi"*, atau kupon diskon baru).
+     * Tombol aksi cepat: *"Tandai Semua Dibaca"* dan tombol *"Lihat Pesanan"* yang langsung mengarahkan ke tab *My Order*.
+  3. **Pencarian Terintegrasi (Live Search Bar)**:
+     * Input teks pada search bar memiliki *listener* dan *onSubmitted*. Saat user mengetik kata kunci (misal *"Coklat"* atau *"Taro"*) dan menekan cari/enter, aplikasi otomatis membuka halaman Katalog Menu dengan filter pencarian tersebut langsung aktif.
+  4. **Banner Promo & Dompet Kupon (Coupon Wallet)**:
+     * Tombol *"Ambil"* pada banner carousel otomatis mengklaim dan menyimpan kode promo ke dalam dompet kupon pengguna (`claimedCoupons`).
+     * Kupon yang sudah diambil akan otomatis terdeteksi pada layar pemesanan/detail donat untuk memotong total biaya.
+  5. **Pengaturan & Logout Sesi Bersih (Clean Session Logout)**:
+     * Ikon gear pengaturan di header menyediakan opsi keluar akun yang secara resmi menghapus Bearer Token dan data sesi lokal (`SharedPreferences.clear()`).
+  6. **Daftar Donat "BEST SELLER"**:
+     * Menampilkan 3 donat terfavorit (Tiramizu, Coklat, Matcha) bersumber langsung dari master data menu lokal (`DummyData.products`).
+     * Tombol *"PESAN"* membuka detail produk untuk kustomisasi topping, jumlah pesanan, dan checkout.
+  7. **Bottom Navigation Bar**:
+     * Indikator aktif dan sinkronisasi navigasi lintas tab (Beranda, Menu, Pesanan, Profil).
 
 ### 3.4. Katalog Varian Rasa (Menu Explorer)
-* **Tujuan**: Memungkinkan pengguna melihat semua kategori dan rasa produk.
-* **Fitur**:
-  * Filter/List Kategori: *Rasa Coklat, Rasa Strawberi, Rasa Taro, Rasa Matcha, Rasa Tiramisu, dan Mix Rasa*.
-  * Kartu produk dengan visual menarik, nama varian, dan tombol pilih.
+* **Tujuan**: Eksplorasi 6 varian donat khas SweetBite dengan pencarian dan belanja fleksibel.
+* **Fitur Dinamis**:
+  1. **Master Data Menu Lokal Terstruktur**:
+     * Menyediakan 6 rasa khas donat (Coklat, Strawberi, Taro, Matcha, Tiramisu, Mix Rasa) menggunakan master data lokal terstruktur, menjaga aplikasi tetap ringan, cepat, dan fokus pada produk utama.
+  2. **Live Filter & Integrasi Search Beranda**:
+     * Live search real-time berdasarkan input pencarian nama rasa.
+     * Menerima parameter pencarian awal dari Search Bar Beranda (`initialSearchQuery`) sehingga otomatis terfilter saat user datang dari Beranda.
+  3. **Ikon Keranjang Belanja Aktif (Cart Badge & Sheet)**:
+     * Dilengkapi badge angka jumlah item di pojok kanan atas header yang reaktif terhadap isi keranjang.
+     * Klik ikon membuka *Shopping Cart Sheet* untuk mengelola belanjaan dan checkout multi-produk.
+  4. **Pemesanan Fleksibel (Direct Order & Quick Cart)**:
+     * Klik kartu/tombol "PESAN": Membuka detail kustomisasi topping dan jumlah.
+     * Dukungan aksi cepat tambah ke keranjang agar pembeli bisa memilih beberapa donat berbeda sekaligus.
 
-### 3.5. Detail Produk & Kustomisasi Topping
-* **Tujuan**: Halaman detail untuk menyesuaikan pesanan sebelum checkout.
-* **Fitur**:
-  * Foto produk resolusi tinggi dengan deskripsi rasa.
-  * **Pilihan Topping (Chips Multi-Select)**:
-    * Oreo
-    * Chocochip
-    * Sprinkle
-    * Kacang Almond
-    * Keju
-  * **Quantity Counter**: Tombol `-` dan `+` untuk mengatur jumlah pesanan.
-  * Tombol CTA utama: *"PESAN"* untuk memasukkan ke pesanan.
 
-### 3.6. Alur Pembayaran & Konfirmasi
-* **Tujuan**: Menyelesaikan transaksi pemesanan.
-* **Fitur**:
-  * Loading Indicator interaktif: *"Pembayaran anda sedang diproses silahkan tunggu....."*.
-  * Dialog/Layar Sukses: *"Pembayaran anda berhasil"*.
-  * Tombol navigasi kembali ke Beranda atau ke halaman *My Order*.
+### 3.5. Detail Produk & Sistem Pemesanan Fleksibel
+* **Tujuan**: Kustomisasi produk, pemilihan topping, alamat kirim, metode bayar, dan fleksibilitas pemesanan.
+* **Fitur Dinamis**:
+  1. **Alamat Pengiriman Dinamis**:
+     * Terhubung otomatis dengan profil user aktif.
+     * Tombol *"Ubah"* membuka dialog input alamat pengantaran baru yang langsung memperbarui tujuan pengiriman pesanan.
+  2. **Topping Selector & Counter Kuantitas**:
+     * Dropdown *"Tambah Toping"* interaktif (Oreo, Chocochip, Sprinkle, Kacang Almond, Keju) dengan penambahan harga seketika ke subtotal.
+     * Counter jumlah pesanan (`-` / `+`) yang secara reaktif menghitung ulang rincian biaya.
+  3. **Voucher Terintegrasi (Kupon Promo Beranda)**:
+     * Mendukung pemakaian kupon promo yang telah diklaim dari banner Beranda via tombol cepat *"Gunakan Kupon Tersimpan"*, serta input manual kode kupon.
+  4. **Metode Pembayaran Fleksibel**:
+     * Pengguna dapat memilih metode pembayaran: E-Wallet (DANA / GoPay), Tunai/COD (Cash on Delivery), atau Transfer Bank.
+  5. **Dual Aksi Pembelian**:
+     * Tombol *"Tambah ke Keranjang"*: Menampung varian donat + topping ke dalam keranjang belanja untuk belanja multi-produk.
+     * Tombol CTA *"PESAN SEKARANG"*: Memproses pesanan instan langsung menuju konfirmasi pembayaran.
 
-### 3.7. Pesanan Saya (My Order Tracking)
-* **Tujuan**: Memantau pesanan yang sedang diproses.
-* **Fitur**:
-  * List pesanan aktif beserta varian: *Rasa Taro, Rasa Coklat, Rasa Tiramizu, Rasa Matcha*.
-  * Label status pengiriman: `Order Status : delivery` dengan badge warna cerah.
-  * Informasi total pembayaran (contoh di Figma: `Total : Rp 26.000`).
+### 3.6. Alur Pembayaran & Konfirmasi (Checkout Lifecycle)
+* **Tujuan**: Penyelesaian transaksi pemesanan dengan pencatatan invoice resmi dan pemicu notifikasi.
+* **Fitur Dinamis**:
+  1. **Simulasi Loading Transaksi**: Indikator proses pembayaran (1.5 detik) sesuai prototype Figma.
+  2. **Penerbitan Kode Invoice Unik**: Menghasilkan ID pesanan resmi (misal: `#ORD-20261024-001`).
+  3. **Pemicu Notifikasi Otomatis**: Transaksi sukses otomatis mengirim notifikasi baru ke Lonceng Beranda (*"Pesanan #ORD... Berhasil Dibuat & Sedang Diproses!"*).
+  4. **Pencatatan Pesanan Aktif**: Pesanan baru otomatis masuk ke urutan teratas (index 0) di tab *My Order*.
+  5. **Navigasi Pascabayar**: Opsi kembali ke Beranda atau langsung memantau perjalanan kurir di *My Order*.
 
-### 3.8. Profil Pengguna & Pengaturan Akun (Frame `profil` & `iPhone 16 Pro - 16`)
-* **Tujuan**: Mengelola informasi personal pengguna (*Yusuf Affandi*).
-* **Fitur Lengkap Sesuai Figma**:
-  * Tampilan foto profil dan tombol *"Ubah Foto"*.
-  * Field Data Pribadi:
-    * *"Nama"*
-    * *"Bio"*
-    * *"Jenis Kelamin"*
-    * *"Tanggal Lahir"*
-    * *"No.Handphone"*
-    * *"Email"*
-  * Form *"Ubah Kata Sandi"*:
-    * *"Masukkan sandi lama"*
-    * *"Masukkan sandi baru"*
-    * *"Ulangi sandi baru"*
-  * Tombol aksi: *"Simpan"* dan tombol Logout (*"Keluar"*).
+### 3.7. Pesanan Saya (Order Lifecycle & Tracking)
+* **Tujuan**: Memantau perjalanan pesanan donat secara bertahap, interaktif, dan permanen.
+* **Fitur Dinamis**:
+  1. **Siklus Status Pesanan 3 Tahap (Order Lifecycle)**:
+     * `Diproses` (Kuning/Oranye): Dapur sedang menyiapkan dan mengemas donat pesanan.
+     * `Sedang Diantar (delivery)` (Hijau Terang): Kurir sedang menuju ke alamat pengiriman.
+     * `Selesai` (Hijau/Abu-abu Sukses): Pesanan telah diterima pembeli.
+  2. **Tombol Aksi "Pesanan Diterima"**:
+     * Pada kartu pesanan berstatus `delivery`, terdapat tombol konfirmasi penerimaan.
+     * Menekan tombol ini memperbarui status pesanan menjadi `Selesai` dan mengirimkan notifikasi penutupan transaksi ke Lonceng Beranda.
+  3. **Lembar Struk Digital / Invoice Lengkap (Order Detail Sheet)**:
+     * Kartu pesanan interaktif (dapat diklik) untuk membuka rincian: No. Invoice (`#ORD-XXXX`), tanggal & waktu, alamat tujuan, metode bayar (DANA/COD), rincian subtotal per item, dan tombol bantuan CS.
+  4. **Ikon Header Interaktif**:
+     * Ikon keranjang membuka keranjang belanja dan ikon gear membuka pengaturan/logout akun.
+  5. **Penyimpanan Permanen (Order Persistence)**:
+     * Riwayat transaksi tersimpan permanen di database MySQL (tabel `orders` & `order_items`) dan memori lokal HP sehingga tidak hilang saat aplikasi ditutup.
 
-### 3.9. Layar Chat / Bantuan (Frame `iPhone 16 Pro - 14`)
-* **Tujuan**: Komunikasi bantuan/pesan terkait pesanan.
-* **Fitur**:
-  * Riwayat percakapan.
-  * Input bar di bagian bawah dengan placeholder: *"Kirim Pesan...."*.
+
+### 3.8. Profil Pengguna & Pengaturan Akun (User Profile Management)
+* **Tujuan**: Manajemen identitas dinamis, foto profil, dan keamanan akun pengguna.
+* **Fitur Dinamis**:
+  1. **Identitas Akun Dinamis**:
+     * Biodata dan email dibaca langsung dari sesi pengguna aktif (`SharedPreferences` / API `GET /api/profile` di tabel MySQL `users`).
+     * Jika pengguna login dengan akun berbeda, profil otomatis menyesuaikan identitas akun tersebut.
+  2. **Ubah Foto Profil (Galeri & Kamera)**:
+     * Mengintegrasikan pemilihan gambar dari galeri HP atau kamera.
+     * Foto yang dipilih langsung memperbarui avatar Profil dan otomatis sinkron ke avatar bulat di Header Beranda.
+  3. **Penyimpanan Permanen Biodata (Tombol "Simpan")**:
+     * Pengeditan Nama, Bio, Jenis Kelamin, Tgl Lahir, No. HP, dan Email tersimpan permanen ke database MySQL (`PUT /api/profile`) dan penyimpanan lokal HP.
+     * Perubahan nama pengguna di Profil otomatis memperbarui teks sapaan di Beranda (*"Hallo, [Nama Baru]!"*).
+  4. **Verifikasi Modal Ubah Kata Sandi**:
+     * Validasi keamanan dengan memverifikasi kecocokan sandi lama (`Hash::check`) di database sebelum mengizinkan pembaruan sandi baru.
+  5. **Logout Sesi Bersih (Secure Clean Session Logout)**:
+     * Menghapus Bearer Token & profil dari `SharedPreferences` (`clear()`) dan merevokasi token di server (`POST /api/logout`).
+
+
+### 3.9. Layar Chat Bantuan
+* **Tujuan**: Ruang komunikasi bantuan seputar pesanan dan layanan donat.
+* **Fitur Dinamis**:
+  * Riwayat percakapan dengan bubble pesan pelanggan dan balasan otomatis (*Auto-reply CS*).
+  * Input bar interaktif dengan tombol kirim pesan.
+
 
 ---
 
@@ -157,3 +200,43 @@ Berdasarkan data 123 node transisi prototype yang ada di file Figma, berikut ada
 2. Komponen interaktif (counter kuantitas, dropdown topping, dan feedback tombol) hidup dan responsif terhadap sentuhan pengguna.
 3. Tampilan UI menyerupai desain Figma (warna, layout, sudut lengkung/border radius, dan tipografi).
 4. Kode terstruktur rapi ke dalam folder komponen/widgets, bebas error, serta mudah dibaca.
+5. Terintegrasi dengan Backend REST API Laravel & Database MySQL sehingga data tidak hilang saat restart.
+
+---
+
+## 6. Spesifikasi Backend Laravel & Database MySQL
+
+### 6.1. Skema Database Relasional (MySQL)
+1. **`users`**:
+   * `id`, `name`, `email`, `password`, `bio`, `gender`, `birth_date`, `phone`, `avatar`, `created_at`
+2. **`cart_items`**:
+   * `id`, `user_id`, `product_id`, `topping_name` (nullable), `quantity`, `created_at`
+3. **`orders`**:
+   * `id`, `order_code`, `user_id`, `total_price`, `payment_method`, `delivery_address`, `status` (`cooking`, `delivery`, `completed`), `created_at`
+4. **`order_items`**:
+   * `id`, `order_id`, `product_name`, `topping_name` (nullable), `quantity`, `subtotal`
+5. **`notifications`**:
+   * `id`, `user_id`, `title`, `message`, `type` (`order`, `promo`, `system`), `is_read`, `created_at`
+6. **`claimed_coupons`**:
+   * `id`, `user_id`, `coupon_code`, `discount_amount`, `is_used`, `created_at`
+
+*(Catatan: Master varian donat 6 rasa khas dikelola melalui master data lokal terstruktur di Flutter `DummyData.products` untuk performa instan dan stabilitas tinggi).*
+
+### 6.2. Daftar Endpoint REST API Laravel
+| Method | Endpoint | Fungsi | Payload / Response |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/register` | Mendaftarkan akun baru | `{name, email, password}` $\rightarrow$ Token & User |
+| `POST` | `/api/login` | Autentikasi pengguna | `{email, password}` $\rightarrow$ Token & User |
+| `POST` | `/api/logout` | Revokasi sesi login pengguna | Bearer Token $\rightarrow$ Status Sukses |
+| `GET` | `/api/notifications`| Mengambil daftar notifikasi | List notifikasi & `unread_count` |
+| `PUT` | `/api/notifications/read-all` | Menandai semua notif dibaca | Update `is_read = 1` |
+| `GET` | `/api/cart` | Mengambil isi keranjang belanja| List item di keranjang & total |
+| `POST` | `/api/cart` | Menambah donat ke keranjang | `{product_name, topping, quantity}` |
+| `DELETE`| `/api/cart/{id}` | Menghapus item dari keranjang | ID item keranjang |
+| `POST` | `/api/checkout` | Membuat transaksi pesanan baru| `{items, address, payment_method, coupon}` $\rightarrow$ Invoice |
+| `GET` | `/api/orders` | Mengambil riwayat pesanan | List pesanan aktif & riwayat |
+| `PUT` | `/api/orders/{id}/complete` | Konfirmasi pesanan diterima | Update status $\rightarrow$ `completed` |
+| `PUT` | `/api/profile` | Memperbarui biodata pengguna | `{name, bio, phone, birth_date}` |
+| `PUT` | `/api/profile/password` | Verifikasi & ubah kata sandi| `{old_password, new_password}` |
+
+

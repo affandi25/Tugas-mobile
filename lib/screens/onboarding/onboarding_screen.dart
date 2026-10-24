@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../core/app_colors.dart';
-import 'login_screen.dart';
+import '../../core/app_colors.dart';
+import '../auth/login_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -74,6 +74,7 @@ class OnboardingScreen extends StatelessWidget {
                     border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
                     boxShadow: const [
                       BoxShadow(
+                        
                         color: Color(0x20000000),
                         blurRadius: 20,
                         offset: Offset(0, 6),
